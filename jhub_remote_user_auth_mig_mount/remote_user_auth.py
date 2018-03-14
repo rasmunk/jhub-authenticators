@@ -59,7 +59,7 @@ class RemoteUserLoginHandler(BaseHandler):
                 user_dict = literal_eval(remote_user)
             except ValueError as err:
                 msg = "passed invalid {} header format".format(header_name)
-                self.log.error("Login failed: {}".format(msg))
+                self.log.error("Login failed: {} - {}".format(msg, err))
                 raise web.HTTPError(403, "{}".format(msg))
 
             if type(user_dict) is not dict:
