@@ -22,8 +22,12 @@ def tests_auth_hub(hub_container):
     user_cert = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Rasmus ' \
                 'Munk/emailAddress=rasmus.munk@nbi.ku.dk'
     cert_auth_header = {
-        'Remote-User': user_cert
+        'Remote-User': {'USER': user_cert, 'IS_ADMIN': False}
     }
+
+    auth_response = session.get("http://127.0.0.1:8000/hub/login",
+                                headers=cert_auth_header)
+    assert auth_response.status_code == 200
 
     wrong_mig_dict = {'SESSIONS': 's324324234',
                       'WIE': 'dsfsdfs'}
@@ -79,9 +83,6 @@ ojR4eIsIc//+fVpkr56fg2OUGhmI+jw87k9hG5uxgBCqOAJuWjEo7A==
         'Mig-Mount': str(correct_mig_dict)
     }
 
-    auth_response = session.get("http://127.0.0.1:8000/hub/login",
-                                headers=cert_auth_header)
-    assert auth_response.status_code == 200
     # Invalid mount header
     auth_mount_response = session.get("http://127.0.0.1:8000/hub/mount",
                                       headers=wrong_mig_header)

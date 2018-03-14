@@ -7,17 +7,17 @@ HUB_IMAGE_TAG = "hub:test"
 HUB_CONTAINER_NAME = "jupyterhub"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def hub_image():
-    """Build the image for the jupyterhub. We'll run this as a service
-    that's going to then spawn the notebook server services.
+    """Build the image for the jupyterhub. We'll run this as a container
+     and then make http requests against the published port.
     """
     client = docker.from_env()
 
     # Build the image from the root of the package
     parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     image = client.images.build(path=parent_dir, tag=HUB_IMAGE_TAG, rm=True,
-                                pull=True, forcerm=True)
+                                pull=True)
     yield image
     if type(image) == tuple:
         client.images.remove(image[0].tags[0])
@@ -29,9 +29,9 @@ def hub_image():
 # hub_container
 @pytest.fixture
 def hub_container(hub_image):
-    """Launch the hub service.
+    """Launch the hub container.
     Note that we don't directly use any of the arguments, but those fixtures need to be
-    in place before we can launch the service.
+    in place before we can launch the container.
     """
 
     client = docker.from_env()
