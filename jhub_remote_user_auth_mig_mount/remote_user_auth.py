@@ -54,8 +54,29 @@ class RemoteUserLoginHandler(BaseHandler):
         if remote_user == "":
             raise web.HTTPError(401, "You are not authenticated to do this")
         else:
-            safe_user = safeinput_encode(remote_user)
+            user_dict = None
+            try:
+                user_dict = literal_eval(remote_user)
+            except ValueError as err:
+                msg = "passed invalid {} header format".format(header_name)
+                self.log.error("Login failed: {}".format(msg))
+                raise web.HTTPError(403, "{}".format(msg))
+
+            if type(user_dict) is not dict:
+                msg = "{} header must be a dictionary".format(header_name)
+                self.log.error("{}".format(msg))
+                raise web.HTTPError(403, "{}".format(msg))
+
+            required_keys = ['USER', 'IS_ADMIN']
+            missing_keys = [key for key in required_keys if key not in user_dict]
+            if len(missing_keys) > 0:
+                msg = "Missing header keys: {}".format(",".join(missing_keys))
+                self.log.error("{}".format(msg))
+                raise web.HTTPError(403, "{}".format(msg))
+
+            safe_user = safeinput_encode(user_dict['USER'])
             user = self.user_from_username(safe_user)
+            user.is_admin = user_dict['IS_ADMIN']
             user.real_name = remote_user
             self.set_login_cookie(user)
             argument = self.get_argument("next", None, True)
