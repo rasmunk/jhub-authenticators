@@ -116,9 +116,8 @@ class MiGMountHandler(BaseHandler):
                 raise web.HTTPError(403, "{}".format(msg))
 
             # Validate required dictionary keys
-            required_keys = ['SESSIONID', 'USER_CERT',
-                             'TARGET_MOUNT_ADDR', 'MOUNTSSHPRIVATEKEY',
-                             'MOUNTSSHPUBLICKEY']
+            required_keys = ['MOUNT_HOST', 'SESSIONID', 'TARGET_MOUNT_ADDR',
+                             'MOUNTSSHPRIVATEKEY']
             missing_keys = [key for key in required_keys if key
                             not in mount_header_dict]
             if len(missing_keys) > 0:
@@ -197,7 +196,7 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
             (app.base_url[:-1], PartialBaseURLHandler),
             (app.base_url, PartialBaseURLHandler),
             (r'/login', RemoteUserLoginHandler),
-            (r'/mount', MiGMountHandler)
+            (r'/mount', MiGMountHandler),
         ]
 
     @gen.coroutine
